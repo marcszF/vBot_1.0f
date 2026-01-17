@@ -3,6 +3,7 @@ local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local customScriptPaths = {"/zFreeScripts", "/zxVarios", "/zzAjudasDiscord"}
 local luaExtension = ".lua"
 local luaExtensionLength = #luaExtension
+local luaExtensionOffset = luaExtensionLength + 1
 
 local function listDirectoryFilesSafe(path, recursive, label)
   if not g_resources.directoryExists(path) then
@@ -43,7 +44,7 @@ local function loadScriptSafely(name, sourceFile)
   local status, result = pcall(loadScript, name)
   if not status then
     if sourceFile and sourceFile ~= name then
-      warn("[Custom Scripts] Error loading " .. sourceFile .. " (script: " .. name .. "):\n" .. result)
+      warn("[Custom Scripts] Error loading " .. name .. " (source: " .. sourceFile .. "):\n" .. result)
     else
       warn("[Custom Scripts] Error loading " .. name .. ":\n" .. result)
     end
@@ -57,7 +58,7 @@ local function normalizeScriptName(file)
     scriptName = scriptName:sub(2)
   end
   if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
-    scriptName = scriptName:sub(1, -(luaExtensionLength + 1))
+    scriptName = scriptName:sub(1, -luaExtensionOffset)
   end
   return scriptName
 end
