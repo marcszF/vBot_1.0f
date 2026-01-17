@@ -1,5 +1,6 @@
 -- load all otui files, order doesn't matter
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
+local customScriptPaths = {"/zFreeScripts", "/zxVarios", "/zzAjudasDiscord"}
 
 local configFiles = g_resources.listDirectoryFiles("/bot/" .. configName .. "/vBot", true, false)
 for i, file in ipairs(configFiles) do
@@ -9,8 +10,25 @@ for i, file in ipairs(configFiles) do
   end
 end
 
+for _, path in ipairs(customScriptPaths) do
+  local scriptUiFiles = g_resources.listDirectoryFiles(path, true, false)
+  for i, file in ipairs(scriptUiFiles) do
+    local ext = file:split(".")
+    if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
+      g_ui.importStyle(file)
+    end
+  end
+end
+
 local function loadScript(name)
   return dofile("/" .. name .. ".lua")
+end
+
+local function loadScriptSafely(name)
+  local status, result = pcall(loadScript, name)
+  if not status then
+    warn("[Custom Scripts] Error loading " .. name .. ":\n" .. result)
+  end
 end
 
 -- here you can set manually order of scripts
@@ -59,7 +77,9 @@ local luaFiles = {
   "vBot/ingame_editor",
 }
 
+local loadedScripts = {}
 for i, file in ipairs(luaFiles) do
+  loadedScripts[file] = true
   loadScript(file)
 end
 
@@ -68,3 +88,34 @@ local label = UI.Label("Custom Scripts:")
 label:setColor('#9dd1ce')
 label:setFont('verdana-11px-rounded')
 UI.Separator()
+
+local function normalizeScriptName(file)
+  local scriptName = file
+  if scriptName:sub(1, 1) == "/" then
+    scriptName = scriptName:sub(2)
+  end
+  if scriptName:lower():sub(-4) == ".lua" then
+    scriptName = scriptName:sub(1, -5)
+  end
+  return scriptName
+end
+
+local function loadCustomScripts(paths)
+  for _, path in ipairs(paths) do
+    local scripts = g_resources.listDirectoryFiles(path, true, false)
+    table.sort(scripts)
+    for i, file in ipairs(scripts) do
+      local ext = file:split(".")
+      if ext[#ext]:lower() == "lua" then
+        local scriptName = normalizeScriptName(file)
+        if not loadedScripts[scriptName] then
+          loadedScripts[scriptName] = true
+          loadScriptSafely(scriptName)
+        end
+      end
+    end
+  end
+end
+
+loadCustomScripts(customScriptPaths)
+setDefaultTab("Main")
