@@ -1,18 +1,20 @@
 -- load all otui files, order doesn't matter
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
-local customScriptPaths = {
-  "/zFreeScripts",
-  "/zxVarios",
-  "/zzAjudasDiscord",
-  "/bot/" .. configName .. "/zFreeScripts",
-  "/bot/" .. configName .. "/zxVarios",
-  "/bot/" .. configName .. "/zzAjudasDiscord",
-}
+local baseCustomScriptDirs = {"zFreeScripts", "zxVarios", "zzAjudasDiscord"}
+local customScriptPaths = {}
+for _, dir in ipairs(baseCustomScriptDirs) do
+  table.insert(customScriptPaths, "/" .. dir)
+  table.insert(customScriptPaths, "/bot/" .. configName .. "/" .. dir)
+end
 local luaExtension = ".lua"
+local enableDirectoryWarnings = false
 
 local function listDirectoryFilesSafe(path, recursive, label)
   local files = g_resources.listDirectoryFiles(path, recursive, false)
   if not files then
+    if enableDirectoryWarnings then
+      warn("[" .. label .. "] Unable to read directory: " .. path)
+    end
     return {}
   end
   return files
