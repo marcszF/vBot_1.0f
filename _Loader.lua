@@ -17,11 +17,29 @@ local function listDirectoryFilesSafe(path, recursive, label)
   end
   return files
 end
+
+local function getFileExtension(file)
+  local parts = file:split(".")
+  local ext = parts[#parts]
+  return ext and ext:lower() or ""
+end
+
+local function normalizeScriptName(file)
+  local scriptName = file
+  if scriptName:sub(1, 1) == "/" then
+    scriptName = scriptName:sub(2)
+  end
+  if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
+    scriptName = scriptName:sub(1, -luaExtensionOffset)
+  end
+  return scriptName
+end
+
 local configPath = "/bot/" .. configName .. "/vBot"
 local configFiles = listDirectoryFilesSafe(configPath, true, "UI Loader")
 for i, file in ipairs(configFiles) do
-  local ext = file:split(".")
-  if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
+  local ext = getFileExtension(file)
+  if ext == "ui" or ext == "otui" then
     g_ui.importStyle(file)
   end
 end
@@ -29,15 +47,16 @@ end
 for _, path in ipairs(customScriptPaths) do
   local scriptUiFiles = listDirectoryFilesSafe(path, true, "Custom Scripts UI")
   for i, file in ipairs(scriptUiFiles) do
-    local ext = file:split(".")
-    if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
+    local ext = getFileExtension(file)
+    if ext == "ui" or ext == "otui" then
       g_ui.importStyle(file)
     end
   end
 end
 
 local function loadScript(name)
-  return dofile("/" .. name .. ".lua")
+  local scriptName = normalizeScriptName(name)
+  return dofile("/" .. scriptName .. luaExtension)
 end
 
 local function loadScriptSafely(name, sourceFile)
@@ -50,17 +69,6 @@ local function loadScriptSafely(name, sourceFile)
     end
   end
   return status
-end
-
-local function normalizeScriptName(file)
-  local scriptName = file
-  if scriptName:sub(1, 1) == "/" then
-    scriptName = scriptName:sub(2)
-  end
-  if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
-    scriptName = scriptName:sub(1, -luaExtensionOffset)
-  end
-  return scriptName
 end
 
 -- here you can set manually order of scripts
@@ -125,8 +133,8 @@ local function loadCustomScripts(paths)
     local scripts = listDirectoryFilesSafe(path, true, "Custom Scripts")
     table.sort(scripts)
     for i, file in ipairs(scripts) do
-      local ext = file:split(".")
-      if ext[#ext]:lower() == "lua" then
+      local ext = getFileExtension(file)
+      if ext == "lua" then
         local scriptName = normalizeScriptName(file)
         if not loadedScripts[scriptName] then
           loadedScripts[scriptName] = true
