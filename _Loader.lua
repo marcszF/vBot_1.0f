@@ -1,8 +1,23 @@
 -- load all otui files, order doesn't matter
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local customScriptPaths = {"/zFreeScripts", "/zxVarios", "/zzAjudasDiscord"}
+local luaExtension = ".lua"
+local luaExtensionLength = #luaExtension
 
-local configFiles = g_resources.listDirectoryFiles("/bot/" .. configName .. "/vBot", true, false) or {}
+local function listDirectoryFilesSafe(path, recursive, label)
+  if not g_resources.directoryExists(path) then
+    warn("[" .. label .. "] Directory not found: " .. path)
+    return {}
+  end
+  local files = g_resources.listDirectoryFiles(path, recursive, false)
+  if not files then
+    warn("[" .. label .. "] Unable to read directory: " .. path)
+    return {}
+  end
+  return files
+end
+local configPath = "/bot/" .. configName .. "/vBot"
+local configFiles = listDirectoryFilesSafe(configPath, true, "UI Loader")
 for i, file in ipairs(configFiles) do
   local ext = file:split(".")
   if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
@@ -11,7 +26,7 @@ for i, file in ipairs(configFiles) do
 end
 
 for _, path in ipairs(customScriptPaths) do
-  local scriptUiFiles = g_resources.listDirectoryFiles(path, true, false) or {}
+  local scriptUiFiles = listDirectoryFilesSafe(path, true, "Custom Scripts UI")
   for i, file in ipairs(scriptUiFiles) do
     local ext = file:split(".")
     if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
@@ -41,8 +56,8 @@ local function normalizeScriptName(file)
   if scriptName:sub(1, 1) == "/" then
     scriptName = scriptName:sub(2)
   end
-  if #scriptName > 4 and scriptName:lower():sub(-4) == ".lua" then
-    scriptName = scriptName:sub(1, -5)
+  if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
+    scriptName = scriptName:sub(1, -(luaExtensionLength + 1))
   end
   return scriptName
 end
@@ -106,7 +121,7 @@ UI.Separator()
 
 local function loadCustomScripts(paths)
   for _, path in ipairs(paths) do
-    local scripts = g_resources.listDirectoryFiles(path, true, false) or {}
+    local scripts = listDirectoryFilesSafe(path, true, "Custom Scripts")
     table.sort(scripts)
     for i, file in ipairs(scripts) do
       local ext = file:split(".")
