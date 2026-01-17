@@ -19,19 +19,13 @@ local function listDirectoryFilesSafe(path, recursive, label)
 end
 
 local function getFileExtension(file)
-  if not file:find("%.") then
-    return ""
-  end
-  local parts = file:split(".")
-  local ext = parts[#parts]
+  local ext = file:match("%.([^.]+)$")
   return ext and ext:lower() or ""
 end
 
 local function normalizeScriptName(file)
   local scriptName = file
-  if scriptName:sub(1, 1) == "/" then
-    scriptName = scriptName:sub(2)
-  end
+  scriptName = scriptName:gsub("^/+", "")
   if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
     scriptName = scriptName:sub(1, -luaExtensionOffset)
   end
@@ -71,7 +65,7 @@ local function loadScriptSafely(name, sourceFile)
       warn("[Custom Scripts] Error loading " .. name .. ":\n" .. result)
     end
   end
-  return status
+  return status, result
 end
 
 -- here you can set manually order of scripts
@@ -132,6 +126,7 @@ label:setFont('verdana-11px-rounded')
 UI.Separator()
 
 local function loadCustomScripts(paths)
+  -- load in deterministic order: directory order first, then sorted files
   for _, path in ipairs(paths) do
     local scripts = listDirectoryFilesSafe(path, true, "Custom Scripts")
     table.sort(scripts)
