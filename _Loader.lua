@@ -10,8 +10,8 @@ local luaExtension = ".lua"
 local enableDirectoryWarnings = false
 
 local function listDirectoryFilesSafe(path, recursive, label)
-  local files = g_resources.listDirectoryFiles(path, recursive, false)
-  if not files then
+  local ok, files = pcall(g_resources.listDirectoryFiles, path, recursive, false)
+  if not ok or not files then
     if enableDirectoryWarnings then
       warn("[" .. label .. "] Unable to read directory: " .. path)
     end
