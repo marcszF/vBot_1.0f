@@ -25,7 +25,7 @@ end
 
 local function normalizeScriptName(file)
   local scriptName = file
-  scriptName = scriptName:gsub("^/+", "")
+  scriptName = scriptName:gsub("^/+", "") -- strip any leading slashes from resource paths
   if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
     scriptName = scriptName:sub(1, -luaExtensionOffset)
   end
@@ -126,7 +126,7 @@ label:setFont('verdana-11px-rounded')
 UI.Separator()
 
 local function loadCustomScripts(paths)
-  -- load in deterministic order: directory order first, then sorted files
+  -- load in deterministic order: customScriptPaths order first, then sorted files
   for _, path in ipairs(paths) do
     local scripts = listDirectoryFilesSafe(path, true, "Custom Scripts")
     table.sort(scripts)
