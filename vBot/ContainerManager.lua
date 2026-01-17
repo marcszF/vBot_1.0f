@@ -455,8 +455,9 @@ parseContainerList()
 -- parse list of sort items in a proper table
 local sList = {}
 local function parseSortItems()
+  sList = {}
   for e, entry in pairs(config.list) do
-    if entry.eEnabled then
+    if entry.eEnabled and entry.eItems then
       for i, item in pairs(entry.eItems) do
         local id = type(item) == 'table' and item.id or item
         sList[id] = entry.eId
@@ -605,11 +606,15 @@ if rootWidget then
           entry.eEnabled = not entry.eEnabled
           label.eEnabled:setChecked(entry.eEnabled)
           label.eEnabled:setImageColor(entry.eEnabled and cGreen or cRed)
+          parseContainerList()
+          parseSortItems()
         end
         -- Entry Remove
         label.eRemove.onClick = function(widget)
           table.remove(config.list, e)
           label:destroy()
+          parseContainerList()
+          parseSortItems()
         end
         -- Entry Minimized
         label.eMinimize:setChecked(entry.eMinimize)
@@ -701,15 +706,15 @@ if rootWidget then
       local t = {
         eId = id,
         eName = name,
-        eEnabled = c.eEnabled or true,
+        eEnabled = c.eEnabled ~= nil and c.eEnabled or true,
         eMinimize = c.eMinimize or false,
-        eOpenNext = c.eOpenNext or true,
-        eRename = c.eRename or true,
+        eOpenNext = c.eOpenNext ~= nil and c.eOpenNext or true,
+        eRename = c.eRename ~= nil and c.eRename or true,
         eInfinite = c.eInfinite or false,
         ePages = c.ePages or false,
         eFull = c.eFull or false,
-        eResize = c.eResize or true,
-        eItems = c.eItems or items,
+        eResize = c.eResize ~= nil and c.eResize or true,
+        eItems = items,
       }
       
       if index then -- update entry
@@ -718,6 +723,8 @@ if rootWidget then
         table.insert(config.list,t)
       end
       refreshEntryList(id)
+      parseContainerList()
+      parseSortItems()
     else
       if id <= 100 then CMUI.contId:setImageColor('red') end
       if name:len() == 0 then 
@@ -784,7 +791,10 @@ local function openMain()
 
   -- Open Main BackPack
   if not isMainOpened() then
-    g_game.use(getBack())
+    local back = getBack()
+    if back then
+      g_game.use(back)
+    end
 
   -- Open Quiver
   elseif not isQuiverOpened() then

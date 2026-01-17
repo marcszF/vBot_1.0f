@@ -101,11 +101,12 @@ addItem("scythe", "Scythe Item", 3453, leftPanel, "This item will be used in var
 addScrollBar("maxUseDist", "Max Distance To Use", 1, 10, 1, leftPanel, "Max distance to 'Use All' hotkey.")
 addTextEdit("useAll", "Use All Hotkey", "space", leftPanel, "Set hotkey for universal actions\nrope, shovel, machete, scythe, use, open doors...")
 if true then
-  local useId = Global.useIds
-  local shovelId = Global.shovelIds
-  local ropeId = Global.ropeIds
-  local macheteId = Global.macheteIds
-  local scytheId = Global.scytheIds
+  local items = Global.items
+  local useId = items.use
+  local shovelId = items.holes
+  local ropeId = items.ropeSpots
+  local macheteId = items.machete
+  local scytheId = items.scythe
 
   -- script
   if settings.useAll and settings.useAll:len() > 0 then
@@ -220,11 +221,7 @@ end
 
 addCheckBox("autoOpenDoors", "Auto Open Doors", true, rightPanel, "Open doors when trying to step on them.")
 if true then
-  local doorsIds = { 5007, 8265, 1629, 1632, 5129, 6252, 6249, 7715, 7712, 7714, 
-                     7719, 6256, 1669, 1672, 5125, 5115, 5124, 17701, 17710, 1642, 
-                     6260, 5107, 4912, 6251, 5291, 1683, 1696, 1692, 5006, 2179, 5116, 
-                     1632, 11705, 30772, 30774, 6248, 5735, 5732, 5120, 23873, 5736,
-                     6264, 5122, 30049, 30042, 7727 }
+  local doorsIds = Global.items.doors
 
   function checkForDoors(pos)
     local tile = g_map.getTile(pos)
