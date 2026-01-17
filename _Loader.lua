@@ -31,6 +31,17 @@ local function loadScriptSafely(name)
   end
 end
 
+local function normalizeScriptName(file)
+  local scriptName = file
+  if scriptName:sub(1, 1) == "/" then
+    scriptName = scriptName:sub(2)
+  end
+  if scriptName:lower():sub(-4) == ".lua" then
+    scriptName = scriptName:sub(1, -5)
+  end
+  return scriptName
+end
+
 -- here you can set manually order of scripts
 -- libraries should be loaded first
 local luaFiles = {
@@ -79,26 +90,14 @@ local luaFiles = {
 
 local loadedScripts = {}
 for i, file in ipairs(luaFiles) do
-  loadedScripts[file] = true
+  loadedScripts[normalizeScriptName(file)] = true
   loadScript(file)
 end
 
-setDefaultTab("Main")
 local label = UI.Label("Custom Scripts:")
 label:setColor('#9dd1ce')
 label:setFont('verdana-11px-rounded')
 UI.Separator()
-
-local function normalizeScriptName(file)
-  local scriptName = file
-  if scriptName:sub(1, 1) == "/" then
-    scriptName = scriptName:sub(2)
-  end
-  if scriptName:lower():sub(-4) == ".lua" then
-    scriptName = scriptName:sub(1, -5)
-  end
-  return scriptName
-end
 
 local function loadCustomScripts(paths)
   for _, path in ipairs(paths) do
