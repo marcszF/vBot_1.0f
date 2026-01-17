@@ -2,6 +2,9 @@
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local baseCustomScriptDirs = {"zFreeScripts", "zxVarios", "zzAjudasDiscord"}
 local function joinPath(prefix, suffix)
+  if prefix == "" then
+    return "/" .. suffix:gsub("^/+", "")
+  end
   return prefix:gsub("/+$", "") .. "/" .. suffix:gsub("^/+", "")
 end
 
