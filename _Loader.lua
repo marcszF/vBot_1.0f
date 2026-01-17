@@ -5,7 +5,6 @@ local luaExtension = ".lua"
 
 local function listDirectoryFilesSafe(path, recursive, label)
   if not g_resources.directoryExists(path) then
-    warn("[" .. label .. "] Directory not found: " .. path)
     return {}
   end
   local files = g_resources.listDirectoryFiles(path, recursive, false)
