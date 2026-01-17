@@ -27,9 +27,13 @@ end
 local function loadScriptSafely(name, sourceFile)
   local status, result = pcall(loadScript, name)
   if not status then
-    local displayName = sourceFile and (sourceFile .. " -> " .. name) or name
-    warn("[Custom Scripts] Error loading " .. displayName .. ":\n" .. result)
+    if sourceFile and sourceFile ~= name then
+      warn("[Custom Scripts] Error loading " .. sourceFile .. " (script: " .. name .. "):\n" .. result)
+    else
+      warn("[Custom Scripts] Error loading " .. name .. ":\n" .. result)
+    end
   end
+  return status
 end
 
 local function normalizeScriptName(file)
