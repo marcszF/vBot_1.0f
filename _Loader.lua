@@ -3,7 +3,7 @@ local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local customScriptPaths = {"/zFreeScripts", "/zxVarios", "/zzAjudasDiscord"}
 local luaExtension = ".lua"
 local luaExtensionLength = #luaExtension
-local luaExtensionOffset = luaExtensionLength + 1
+local luaExtensionOffset = luaExtensionLength + 1 -- include dot before extension
 
 local function listDirectoryFilesSafe(path, recursive, label)
   if not g_resources.directoryExists(path) then
@@ -19,6 +19,9 @@ local function listDirectoryFilesSafe(path, recursive, label)
 end
 
 local function getFileExtension(file)
+  if not file:find("%.") then
+    return ""
+  end
   local parts = file:split(".")
   local ext = parts[#parts]
   return ext and ext:lower() or ""
@@ -146,4 +149,5 @@ local function loadCustomScripts(paths)
 end
 
 loadCustomScripts(customScriptPaths)
+-- restore default tab after loading custom scripts that might change it
 setDefaultTab("Main")
