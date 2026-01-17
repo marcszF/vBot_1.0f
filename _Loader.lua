@@ -1,11 +1,19 @@
 -- load all otui files, order doesn't matter
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local baseCustomScriptDirs = {"zFreeScripts", "zxVarios", "zzAjudasDiscord"}
+local function normalizePathPrefix(prefix)
+  return prefix:gsub("/+$", "")
+end
+
+local function normalizePathSuffix(suffix)
+  return suffix:gsub("^/+", "")
+end
+
 local function joinPath(prefix, suffix)
   if prefix == "" then
-    return "/" .. suffix:gsub("^/+", "")
+    return "/" .. normalizePathSuffix(suffix)
   end
-  return prefix:gsub("/+$", "") .. "/" .. suffix:gsub("^/+", "")
+  return normalizePathPrefix(prefix) .. "/" .. normalizePathSuffix(suffix)
 end
 
 local customScriptPaths = {}
@@ -14,7 +22,9 @@ for _, dir in ipairs(baseCustomScriptDirs) do
   table.insert(customScriptPaths, joinPath("/bot/" .. configName, dir))
 end
 local luaExtension = ".lua"
-local enableDirectoryWarnings = storage and (storage.showDirectoryWarnings or storage.debugDirectoryWarnings) or false -- allow either flag
+local storedWarnings = storage and storage.showDirectoryWarnings
+local storedDebugWarnings = storage and storage.debugDirectoryWarnings
+local enableDirectoryWarnings = storedWarnings or storedDebugWarnings or false -- allow either flag
 
 local function warnDirectory(path, label)
   if enableDirectoryWarnings then
