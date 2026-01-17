@@ -7,11 +7,17 @@ for _, dir in ipairs(baseCustomScriptDirs) do
   table.insert(customScriptPaths, "/bot/" .. configName .. "/" .. dir)
 end
 local luaExtension = ".lua"
-local enableDirectoryWarnings = storage and storage.debugDirectoryWarnings or false
+local enableDirectoryWarnings = storage and (storage.showDirectoryWarnings or storage.debugDirectoryWarnings) or false
 
 local function listDirectoryFilesSafe(path, recursive, label)
   local ok, files = pcall(g_resources.listDirectoryFiles, path, recursive, false)
-  if not ok or files == nil then
+  if not ok then
+    if enableDirectoryWarnings then
+      warn("[" .. label .. "] Unable to read directory: " .. path)
+    end
+    return {}
+  end
+  if not files then
     if enableDirectoryWarnings then
       warn("[" .. label .. "] Unable to read directory: " .. path)
     end
