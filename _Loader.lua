@@ -2,8 +2,6 @@
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local customScriptPaths = {"/zFreeScripts", "/zxVarios", "/zzAjudasDiscord"}
 local luaExtension = ".lua"
-local luaExtensionLength = #luaExtension
-local luaExtensionOffset = luaExtensionLength + 1 -- include dot before extension
 
 local function listDirectoryFilesSafe(path, recursive, label)
   if not g_resources.directoryExists(path) then
@@ -26,8 +24,10 @@ end
 local function normalizeScriptName(file)
   local scriptName = file
   scriptName = scriptName:gsub("^/+", "") -- strip any leading slashes from resource paths
-  if #scriptName > luaExtensionLength and scriptName:lower():sub(-luaExtensionLength) == luaExtension then
-    scriptName = scriptName:sub(1, -luaExtensionOffset)
+  local lowerName = scriptName:lower()
+  local baseName = lowerName:match("^(.*)%.lua$")
+  if baseName then
+    scriptName = scriptName:sub(1, #baseName)
   end
   return scriptName
 end
@@ -116,8 +116,9 @@ local luaFiles = {
 
 local loadedScripts = {}
 for i, file in ipairs(luaFiles) do
-  loadedScripts[normalizeScriptName(file)] = true
-  loadScript(file)
+  local scriptName = normalizeScriptName(file)
+  loadedScripts[scriptName] = file
+  loadScriptSafely(file)
 end
 
 local label = UI.Label("Custom Scripts:")
@@ -134,9 +135,12 @@ local function loadCustomScripts(paths)
       local ext = getFileExtension(file)
       if ext == "lua" then
         local scriptName = normalizeScriptName(file)
-        if not loadedScripts[scriptName] then
-          loadedScripts[scriptName] = true
+        local loadedSource = loadedScripts[scriptName]
+        if not loadedSource then
+          loadedScripts[scriptName] = file
           loadScriptSafely(scriptName, file)
+        elseif loadedSource ~= file then
+          warn("[Custom Scripts] Skipping duplicate script " .. scriptName .. " from " .. file .. " (already loaded from " .. loadedSource .. ")")
         end
       end
     end
