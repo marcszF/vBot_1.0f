@@ -347,7 +347,7 @@ for i, action in ipairs(config.priorities) do
     end
 end
 
-local lastItemUse = now
+local lastItemUse = 0
 local function friendHealerAction(spec, targetsInRange)
     local name = spec:getName()
     local health = spec:getHealthPercent()
@@ -364,8 +364,7 @@ local function friendHealerAction(spec, targetsInRange)
 
     for i, action in ipairs(config.priorities) do
         if action.enabled then
-          if action.area and masResAmount <= targetsInRange and canCast("exura gran mas res", not sCheckRL) then
-            print("oi")
+            if action.area and masResAmount <= targetsInRange and canCast("exura gran mas res", not config.sCheckRL) then
                 return say("exura gran mas res")
             end
             if action.mana and findItem(manaItem) and mana <= normalHeal and dist <= itemRange and now - lastItemUse > 1000 then
@@ -394,13 +393,13 @@ local function isCandidate(spec)
         return false
     end
     
+    local name = spec:getName()
     local curHp = spec:getHealthPercent()
     if curHp == 100 or (config.customPlayers[name] and curHp > config.customPlayers[name]) then
         return false
     end
     
     local specText = spec:getText()
-    local name = spec:getName()
     -- check players is enabled and spectator already verified
     if storage.extras.checkPlayer and specText:len() > 0 then
         if specText:find("EK") and not config.conditions.knights or
