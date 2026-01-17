@@ -24,10 +24,11 @@ local function loadScript(name)
   return dofile("/" .. name .. ".lua")
 end
 
-local function loadScriptSafely(name)
+local function loadScriptSafely(name, sourceFile)
   local status, result = pcall(loadScript, name)
   if not status then
-    warn("[Custom Scripts] Error loading " .. name .. ":\n" .. result)
+    local displayName = sourceFile and (sourceFile .. " -> " .. name) or name
+    warn("[Custom Scripts] Error loading " .. displayName .. ":\n" .. result)
   end
 end
 
@@ -36,7 +37,7 @@ local function normalizeScriptName(file)
   if scriptName:sub(1, 1) == "/" then
     scriptName = scriptName:sub(2)
   end
-  if scriptName:lower():sub(-4) == ".lua" then
+  if #scriptName > 4 and scriptName:lower():sub(-4) == ".lua" then
     scriptName = scriptName:sub(1, -5)
   end
   return scriptName
@@ -109,7 +110,7 @@ local function loadCustomScripts(paths)
         local scriptName = normalizeScriptName(file)
         if not loadedScripts[scriptName] then
           loadedScripts[scriptName] = true
-          loadScriptSafely(scriptName)
+          loadScriptSafely(scriptName, file)
         end
       end
     end
