@@ -13,6 +13,9 @@ local function joinPath(prefix, suffix)
   local normalizedPrefix = normalizePathPrefix(prefix)
   local normalizedSuffix = normalizePathSuffix(suffix)
   if normalizedPrefix == "" then
+    if normalizedSuffix == "" then
+      return ""
+    end
     return "/" .. normalizedSuffix
   end
   if normalizedPrefix:sub(1, 1) ~= "/" then
@@ -27,8 +30,12 @@ for _, dir in ipairs(baseCustomScriptDirs) do
   table.insert(customScriptPaths, joinPath("/bot/" .. configName, dir))
 end
 local luaExtension = ".lua"
-local enableDirectoryWarnings = (storage and storage.showDirectoryWarnings)
-  or (storage and storage.debugDirectoryWarnings)
+local enableDirectoryWarnings = false
+if storage then
+  enableDirectoryWarnings = storage.showDirectoryWarnings
+    or storage.debugDirectoryWarnings
+    or false
+end
 
 local function warnDirectory(path, label)
   if enableDirectoryWarnings then
@@ -42,7 +49,7 @@ local function listDirectoryFilesSafe(path, recursive, label)
     warnDirectory(path, label)
     return {}
   end
-  if not files then
+  if type(files) ~= "table" then
     warnDirectory(path, label)
     return {}
   end
