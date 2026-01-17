@@ -2,7 +2,7 @@
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local customScriptPaths = {"/zFreeScripts", "/zxVarios", "/zzAjudasDiscord"}
 
-local configFiles = g_resources.listDirectoryFiles("/bot/" .. configName .. "/vBot", true, false)
+local configFiles = g_resources.listDirectoryFiles("/bot/" .. configName .. "/vBot", true, false) or {}
 for i, file in ipairs(configFiles) do
   local ext = file:split(".")
   if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
@@ -11,7 +11,7 @@ for i, file in ipairs(configFiles) do
 end
 
 for _, path in ipairs(customScriptPaths) do
-  local scriptUiFiles = g_resources.listDirectoryFiles(path, true, false)
+  local scriptUiFiles = g_resources.listDirectoryFiles(path, true, false) or {}
   for i, file in ipairs(scriptUiFiles) do
     local ext = file:split(".")
     if ext[#ext]:lower() == "ui" or ext[#ext]:lower() == "otui" then
@@ -101,7 +101,7 @@ UI.Separator()
 
 local function loadCustomScripts(paths)
   for _, path in ipairs(paths) do
-    local scripts = g_resources.listDirectoryFiles(path, true, false)
+    local scripts = g_resources.listDirectoryFiles(path, true, false) or {}
     table.sort(scripts)
     for i, file in ipairs(scripts) do
       local ext = file:split(".")
