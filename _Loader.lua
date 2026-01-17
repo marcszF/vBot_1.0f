@@ -9,7 +9,7 @@ local function normalizePathSuffix(suffix)
   return suffix:gsub("^/+", "")
 end
 
-local function joinPath(prefix, suffix)
+local function joinPath(prefix, suffix) -- returns absolute paths rooted at /
   local normalizedPrefix = normalizePathPrefix(prefix)
   local normalizedSuffix = normalizePathSuffix(suffix)
   if normalizedPrefix == "" then
@@ -34,7 +34,6 @@ local enableDirectoryWarnings = false
 if storage then
   enableDirectoryWarnings = storage.showDirectoryWarnings
     or storage.debugDirectoryWarnings
-    or false
 end
 
 local function warnDirectory(path, label)
@@ -45,11 +44,7 @@ end
 
 local function listDirectoryFilesSafe(path, recursive, label)
   local ok, files = pcall(g_resources.listDirectoryFiles, path, recursive, false)
-  if not ok then
-    warnDirectory(path, label)
-    return {}
-  end
-  if type(files) ~= "table" then
+  if not ok or type(files) ~= "table" then
     warnDirectory(path, label)
     return {}
   end
