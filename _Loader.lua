@@ -10,22 +10,27 @@ local function normalizePathSuffix(suffix)
 end
 
 local function joinPath(prefix, suffix)
-  if prefix == "" then
-    return "/" .. normalizePathSuffix(suffix)
+  local normalizedPrefix = normalizePathPrefix(prefix)
+  local normalizedSuffix = normalizePathSuffix(suffix)
+  if normalizedPrefix == "" then
+    return "/" .. normalizedSuffix
   end
-  return normalizePathPrefix(prefix) .. "/" .. normalizePathSuffix(suffix)
+  if normalizedPrefix:sub(1, 1) ~= "/" then
+    normalizedPrefix = "/" .. normalizedPrefix
+  end
+  return normalizedPrefix .. "/" .. normalizedSuffix
 end
 
-local rootPath = ""
 local customScriptPaths = {}
 for _, dir in ipairs(baseCustomScriptDirs) do
-  table.insert(customScriptPaths, joinPath(rootPath, dir))
+  table.insert(customScriptPaths, joinPath("", dir))
   table.insert(customScriptPaths, joinPath("/bot/" .. configName, dir))
 end
 local luaExtension = ".lua"
-local storedWarnings = storage and storage.showDirectoryWarnings
-local storedDebugWarnings = storage and storage.debugDirectoryWarnings
-local enableDirectoryWarnings = storedWarnings or storedDebugWarnings -- allow either flag
+local enableDirectoryWarnings = storage and storage.showDirectoryWarnings
+if enableDirectoryWarnings == nil and storage then
+  enableDirectoryWarnings = storage.debugDirectoryWarnings -- legacy toggle
+end
 
 local function warnDirectory(path, label)
   if enableDirectoryWarnings then
