@@ -16,15 +16,16 @@ local function joinPath(prefix, suffix)
   return normalizePathPrefix(prefix) .. "/" .. normalizePathSuffix(suffix)
 end
 
+local rootPath = ""
 local customScriptPaths = {}
 for _, dir in ipairs(baseCustomScriptDirs) do
-  table.insert(customScriptPaths, joinPath("", dir))
+  table.insert(customScriptPaths, joinPath(rootPath, dir))
   table.insert(customScriptPaths, joinPath("/bot/" .. configName, dir))
 end
 local luaExtension = ".lua"
 local storedWarnings = storage and storage.showDirectoryWarnings
 local storedDebugWarnings = storage and storage.debugDirectoryWarnings
-local enableDirectoryWarnings = storedWarnings or storedDebugWarnings or false -- allow either flag
+local enableDirectoryWarnings = storedWarnings or storedDebugWarnings -- allow either flag
 
 local function warnDirectory(path, label)
   if enableDirectoryWarnings then
