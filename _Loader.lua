@@ -1,26 +1,32 @@
 -- load all otui files, order doesn't matter
 local configName = modules.game_bot.contentsPanel.config:getCurrentOption().text
 local baseCustomScriptDirs = {"zFreeScripts", "zxVarios", "zzAjudasDiscord"}
+local function joinPath(prefix, suffix)
+  return prefix:gsub("/+$", "") .. "/" .. suffix:gsub("^/+", "")
+end
+
 local customScriptPaths = {}
 for _, dir in ipairs(baseCustomScriptDirs) do
-  table.insert(customScriptPaths, "/" .. dir)
-  table.insert(customScriptPaths, "/bot/" .. configName .. "/" .. dir)
+  table.insert(customScriptPaths, joinPath("", dir))
+  table.insert(customScriptPaths, joinPath("/bot/" .. configName, dir))
 end
 local luaExtension = ".lua"
-local enableDirectoryWarnings = storage and (storage.showDirectoryWarnings or storage.debugDirectoryWarnings) or false
+local enableDirectoryWarnings = storage and (storage.showDirectoryWarnings or storage.debugDirectoryWarnings) or false -- allow either flag
+
+local function warnDirectory(path, label)
+  if enableDirectoryWarnings then
+    warn("[" .. label .. "] Unable to read directory: " .. path)
+  end
+end
 
 local function listDirectoryFilesSafe(path, recursive, label)
   local ok, files = pcall(g_resources.listDirectoryFiles, path, recursive, false)
   if not ok then
-    if enableDirectoryWarnings then
-      warn("[" .. label .. "] Unable to read directory: " .. path)
-    end
+    warnDirectory(path, label)
     return {}
   end
   if not files then
-    if enableDirectoryWarnings then
-      warn("[" .. label .. "] Unable to read directory: " .. path)
-    end
+    warnDirectory(path, label)
     return {}
   end
   return files
